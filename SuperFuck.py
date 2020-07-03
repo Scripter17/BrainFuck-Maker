@@ -1,48 +1,53 @@
 import bfm, sys
-def ifBlock(self, **kwargs):
-	code=kwargs["code"].split("|")
-	if len(code)==1:
-		if self.tape[self.pointer]!=0:
-			self.exec(code[0])
-	elif len(code)==2:
-		if self.tape[self.pointer]!=0:
-			self.exec(code[0])
-		else:
-			self.exec(code[1])
+def ifBlock(self, code):
+	code=code.split("|")
+	curCell=self.state["tape"][self.state["pointer"]]
+	if curCell!=0 and (len(code)==1 or len(code)==2):
+		self.run(code[0])
+	elif curCell==0 and (len(code)==2 or len(code)==3):
+		self.run(code[1])
 	elif len(code)==3:
-		if self.tape[self.pointer]<0:
-			self.exec(code[0])
-		elif self.tape[self.pointer]==0:
-			self.exec(code[1])
-		else:
-			self.exec(code[2])
-def twiceBlock(self, **kwargs):
-	code=kwargs["code"]
-	for x in range(2):
-		self.exec(code)
-
-def mulOp(self, **kwargs):
-	self.tape[self.pointer]*=2
-def divOp(self, **kwargs):
-	self.tape[self.pointer]=int(self.tape[self.pointer]/2)
-def atOp(self, **kwargs):
-	self.pointer=self.tape[self.pointer]
-def refOp(self, **kwargs):
-	self.tape[self.pointer]=self.pointer
-def printRaw(self, **kwargs):
-	self.out(self.tape[self.pointer])
+		self.run(code[1-(curCell<0)+(curCell>0)])
+def twiceBlock(self, code):
+	self.run(code)
+	self.run(code)
+def mulOp(self):
+	self.state["tape"][self.state["pointer"]]*=2
+def divOp(self):
+	self.state["tape"][self.state["pointer"]]=int(self.state["tape"][self.state["pointer"]]/2)
+def atOp(self):
+	self.state["pointer"]=self.state["tape"][self.state["pointer"]]
+def refOp(self):
+	self.state["tape"][self.state["pointer"]]=self.state["pointer"]
+def printRaw(self):
+	print(self.state["tape"][self.state["pointer"]], end="")
+def addOp(self):
+	self.state["tape"][self.state["pointer"]]+=1
+def subOp(self):
+	self.state["tape"][self.state["pointer"]]-=1
 superFuck=bfm.BrainFuck(
-	ops={
-		"*":mulOp,
-		"/":divOp,
-		"@":atOp,
-		"&":refOp,
-		"?":printRaw
-	},
-	blocks={
+	{
+		# Old BrainFuck stuff
+		"+": addOp,
+		"-": subOp,
+		">": bfm.defaultBF.incOp,
+		"<": bfm.defaultBF.decOp,
+		".": bfm.defaultBF.outOp,
+		",": bfm.defaultBF.cinOp,
+		"[":[bfm.defaultBF.loopB, "]"],
+		# New SuperFuck stuff
+		"*": mulOp,
+		"/": divOp,
+		"@": atOp,
+		"&": refOp,
+		"?": printRaw,
 		"(":[ifBlock,")"],
 		"{":[twiceBlock, "}"]
 	},
-	nprop="inf"
+	{
+		"tape":[0 for x in range(30000)],
+		"pointer":0
+	}
 )
-superFuck.exec(sys.argv[1])
+superFuck.run(">>>&-@&?")
+#superFuck.run(sys.argv[1])
