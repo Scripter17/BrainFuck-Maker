@@ -8,7 +8,7 @@ import msvcrt
 # - Syntax checking
 #   - Make sure all blocks are properly closed (`[(])` is eiter officially supported or explicitly disallowed)
 
-class BrainFuck:
+class Brainfuck:
 	def __init__(self, rules, state):
 		self.rules=rules # {"+":addOp, ..., "[":[whileBlock, "]"], ...}
 		self.state=state # {"tape":[...], "pointer":0, ...}

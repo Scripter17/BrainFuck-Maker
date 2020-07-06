@@ -10,5 +10,5 @@ def loopBlock(self, code): # [code]
 		if type(returnData)==dict and "exit" in returnData and returnData["exit"]==True:
 			return {"exit":True}
 
-BF=bfm.BrainFuck({"E":exitOperator, **bfm.defaultBF.rules, "[":[loopBlock, "]"]}, bfm.defaultBF.state)
+BF=bfm.Brainfuck({"E":exitOperator, **bfm.defaultBF.rules, "[":[loopBlock, "]"]}, bfm.defaultBF.state)
 BF.run("+[[[E]]].") # Expected output: 

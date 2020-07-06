@@ -47,16 +47,9 @@ def addOp(self):
 def subOp(self):
 	self.state["tape"][self.state["pointer"]]-=1
 
-superFuck=bfm.BrainFuck(
+superFuck=bfm.Brainfuck(
 	{
-		# Old BrainFuck stuff
-		"+": addOp,
-		"-": subOp,
-		">": bfm.defaultBF.incOp,
-		"<": bfm.defaultBF.decOp,
-		".": bfm.defaultBF.outOp,
-		",": bfm.defaultBF.cinOp,
-		"[":[bfm.defaultBF.loopB, "]"],
+		**bfm.defaultBF.rules, # Old brainfuck stuff
 		# New SuperFuck stuff
 		"*": mulOp,
 		"/": divOp,
