@@ -1,23 +1,51 @@
-# BrainFuck-Maker
+# Brainfuck-Maker
 
-## A Python module that makes it easy to make any kind of BrainFuck derivative you want
+A Python module that makes it easy to make any kind of [brainfuck](https://esolangs.org/wiki/BrainFuck) derivative you want
 
 # Basic usage
 
-Execute normal BF code
-
+#### Execute normal BF code
 ```Python
 import bfm
-a=bfm.BrainFuck()
-a.exec("+[-[<<[+[--->]-[<<<]]]>>>-]>-.---.>..>.<<<<-.<+.>>>>>.>.<<.<-.")
+BF=bfm.BrainFuck(bfm.defaultBF.rules, bfm.defaultBF.state)
+BF.run("+[-[<<[+[--->]-[<<<]]]>>>-]>-.---.>..>.<<<<-.<+.>>>>>.>.<<.<-.")
 ```
 
-You may notice that, instead of printing "hello world", this just gets stuck forever (I think)\ 
-This is because instead of each cell ranging from 0-255, the cells can be any integer.\ 
-To fix this, change `BrainFuck()` to `BrainFuck(nprop="char")`
+#### Custom operators
 
+Let's say you want to add a custom doubling operator `*`. You would use the following code:
 ```Python
 import bfm
-a=bfm.BrainFuck(nprop="char")
-a.exec("+[-[<<[+[--->]-[<<<]]]>>>-]>-.---.>..>.<<<<-.<+.>>>>>.>.<<.<-.")
+def doubleOperator(self):
+	self.state["tape"][self.state["pointer"]]*=2
+BF=bfm.BrainFuck({
+		"*":doubleOperator,
+		**bfm.defaultBF.rules
+	}, bfm.defaultBF.state)
+BF.run("+******+.+.+.") # Expected output: ABC
 ```
+
+#### Loops
+
+And now let's say you want to add an if statement
+```Python
+import bfm
+def ifBlock(self, code):
+	if self.state["tape"][self.state["pointer"]]!=0:
+		self.run(code)
+BF=bfm.BrainFuck({
+		"(":[ifBlock, ")"],
+		**bfm.defaultBF.rules
+	}, bfm.defaultBF.state)
+BF.run("(.)+(.)") # Expected output: <0x01>
+```
+
+#### States
+```Python
+class defaultBF:
+	state={
+		"tape":[0 for x in range(30000)],
+		"pointer":0
+	}
+```
+Yeah you can just use any old object as a state variable

@@ -1,30 +1,52 @@
 import bfm, sys
+
 def ifBlock(self, code):
-	code=code.split("|")
+	carr=[]
+	cind=0
+	# Properly parse only the top level if-statement
+	# "(+(?|??)|???)" -> ["+(?|??)", "???"]
+	# Probably breaks when the code has syntax errors, but like, that should just break regardless
+	# <jank>
+	for i in range(len(code)):
+		if code[i]=="(": cind+=1
+		if code[i]==")": cind-=1
+		if code[i]=="|" and cind==0:
+			carr.append(code[sum(map(len, carr))+len(carr):i])
+	carr.append(code[sum(map(len, carr))+len(carr):]) # Jank as FUCK
+	# </jank>
 	curCell=self.state["tape"][self.state["pointer"]]
-	if curCell!=0 and (len(code)==1 or len(code)==2):
-		self.run(code[0])
-	elif curCell==0 and (len(code)==2 or len(code)==3):
-		self.run(code[1])
-	elif len(code)==3:
-		self.run(code[1-(curCell<0)+(curCell>0)])
+	if curCell!=0 and (len(carr)==1 or len(carr)==2):
+		self.run(carr[0])
+	elif curCell==0 and (len(carr)==2 or len(carr)==3):
+		self.run(carr[1])
+	elif len(carr)==3:
+		self.run(carr[1-(curCell<0)+(curCell>0)])
+
 def twiceBlock(self, code):
 	self.run(code)
 	self.run(code)
+
 def mulOp(self):
 	self.state["tape"][self.state["pointer"]]*=2
+
 def divOp(self):
-	self.state["tape"][self.state["pointer"]]=int(self.state["tape"][self.state["pointer"]]/2)
+	self.state["tape"][self.state["pointer"]]//=2
+
 def atOp(self):
 	self.state["pointer"]=self.state["tape"][self.state["pointer"]]
+
 def refOp(self):
 	self.state["tape"][self.state["pointer"]]=self.state["pointer"]
+
 def printRaw(self):
 	print(self.state["tape"][self.state["pointer"]], end="")
+
 def addOp(self):
 	self.state["tape"][self.state["pointer"]]+=1
+
 def subOp(self):
 	self.state["tape"][self.state["pointer"]]-=1
+
 superFuck=bfm.BrainFuck(
 	{
 		# Old BrainFuck stuff
@@ -49,5 +71,6 @@ superFuck=bfm.BrainFuck(
 		"pointer":0
 	}
 )
-superFuck.run(">>>&-@&?")
+
+superFuck.run("(+(?|??)|???)") # Expected output: 000
 #superFuck.run(sys.argv[1])
