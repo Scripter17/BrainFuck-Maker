@@ -7,7 +7,7 @@ A Python module that makes it easy to make any kind of [brainfuck](https://esola
 #### Execute normal BF code
 ```Python
 import bfm
-BF=bfm.BrainFuck(bfm.defaultBF.rules, bfm.defaultBF.state)
+BF=bfm.Brainfuck(bfm.defaultBF.rules, bfm.defaultBF.state)
 BF.run("+[-[<<[+[--->]-[<<<]]]>>>-]>-.---.>..>.<<<<-.<+.>>>>>.>.<<.<-.")
 ```
 
@@ -18,7 +18,7 @@ Let's say you want to add a custom doubling operator `*`. You would use the foll
 import bfm
 def doubleOperator(self):
 	self.state["tape"][self.state["pointer"]]*=2
-BF=bfm.BrainFuck({
+BF=bfm.Brainfuck({
 		"*":doubleOperator,
 		**bfm.defaultBF.rules
 	}, bfm.defaultBF.state)
@@ -33,7 +33,7 @@ import bfm
 def ifBlock(self, code):
 	if self.state["tape"][self.state["pointer"]]!=0:
 		self.run(code)
-BF=bfm.BrainFuck({
+BF=bfm.Brainfuck({
 		"(":[ifBlock, ")"],
 		**bfm.defaultBF.rules
 	}, bfm.defaultBF.state)
