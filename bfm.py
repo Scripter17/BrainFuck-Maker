@@ -8,7 +8,7 @@ import msvcrt
 # - Syntax checking
 #   - Make sure all blocks are properly closed (`[(])` is eiter officially supported or explicitly disallowed)
 
-class BrainFuck:
+class Brainfuck:
 	def __init__(self, rules, state):
 		self.rules=rules # {"+":addOp, ..., "[":[whileBlock, "]"], ...}
 		self.state=state # {"tape":[...], "pointer":0, ...}
@@ -27,6 +27,7 @@ class BrainFuck:
 
 	def run(self, code):
 		instruction=0
+		bReturnDict={}
 		while instruction<len(code):
 			returnData={}
 			if code[instruction] in self.rules:
@@ -39,9 +40,27 @@ class BrainFuck:
 					# Operator
 					returnData=self.rules[code[instruction]](self)
 				if type(returnData)==dict:
-					if "exit" in returnData and returnData["exit"]==True:
-						return {"exit":True}
+					iReturnDict={}
+					# Instruction return data codes
+					if "exit" in returnData:
+						iReturnDict["exit"]=returnData["exit"]
+					if "instruction" in returnData:
+						if type(returnData["instruction"])==int:
+							instruction=returnData["instruction"]
+						elif type(returnData["instruction"])==complex and returnData["instruction"].real==0:
+							instruction+=int(returnData["instruction"].imag)
+					if "iRet" in returnData:
+						iReturnDict["iRet"]=returnData["iRet"]
+					# Block return data codes
+					if "code" in returnData:
+						code=returnData["code"]
+						bReturnDict["code"]=returnData["code"]
+					if "bRet" in returnData:
+						bReturnDict["bRet"]=returnData["bRet"]
+					if len(iReturnDict.keys())!=0 and not ("exit" in iReturnDict and iReturnDict["exit"]==False):
+						return iReturnDict
 			instruction+=1
+		return bReturnDict
 
 class defaultBF:
 	def addOp(self):
@@ -64,7 +83,9 @@ class defaultBF:
 		self.state["tape"][self.state["pointer"]]=ord(msvcrt.getch()) # ,
 	def loopBlock(self, code): # [code]
 		while self.state["tape"][self.state["pointer"]]!=0:
-			self.run(code)
+			returnData=self.run(code)
+			if type(returnData)==dict and "code" in returnData:
+				code=returnData["code"]
 	rules={
 		"+": addOp,
 		"-": subOp,
